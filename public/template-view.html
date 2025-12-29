@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Preview do Template</title>
+
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+
+<body>
+
+<div class="sidebar">
+    <a href="/"><h1>WhatsApp Panel</h1></a>
+    <a href="/message">⬅ Voltar</a>
+</div>
+
+<div class="main">
+    <h1>Preview do Template</h1>
+
+    <div class="preview-container">
+
+        <!-- PREVIEW -->
+        <div class="whatsapp-preview">
+            <img id="image">
+            <p id="text"></p>
+        </div>
+
+        <!-- TEST -->
+        <div class="test-box">
+            <h3>Enviar Mensagem de Teste</h3>
+
+            <input id="number" placeholder="+5511999999999">
+            <button onclick="sendTest()">🚀 Enviar</button>
+
+            <p id="status"></p>
+        </div>
+
+    </div>
+</div>
+
+<script>
+const id = location.pathname.split('/')[2];
+
+async function loadTemplate() {
+    const res = await fetch('/api/templates');
+    const templates = await res.json();
+
+    const t = templates.find(x => x.id == id);
+    if (!t) return;
+
+    if (t.image) {
+        document.getElementById('image').src = t.image;
+    } else {
+        document.getElementById('image').style.display = 'none';
+    }
+
+    document.getElementById('text').innerText = t.text;
+}
+
+async function sendTest() {
+    const number = document.getElementById('number').value;
+    const status = document.getElementById('status');
+
+    if (!number) {
+        status.innerText = 'Digite um número válido';
+        return;
+    }
+
+    status.innerText = '⏳ Enviando mensagem...';
+
+    const res = await fetch(`/api/templates/${id}/test`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ number })
+    });
+
+    const data = await res.json();
+
+    status.innerText =
+        data.status === 'success'
+            ? '✅ ' + data.message
+            : '❌ ' + data.message;
+}
+
+loadTemplate();
+</script>
+
+</body>
+</html>

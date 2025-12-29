@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Gerador de Números</title>
+
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <a href="/"><h1>WhatsApp Panel</h1></a>
+    <a href="/status">📡 Status</a>
+    <a href="/csv">📄 Lista de Contatos</a>
+    <a href="/generate" class="active">🔢 Gerador</a>
+    <a href="/message">✉️ Mensagens</a>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+    <div class="header">Gerador & Validador</div>
+
+    <!-- GRID PADRÃO -->
+    <div class="grid grid-2">
+
+        <!-- CONFIGURAÇÃO -->
+        <div class="card">
+            <h2>Configuração</h2>
+
+            <div class="form-group">
+                <label>Prefixo</label>
+                <input id="prefix" placeholder="+55 13 97402">
+            </div>
+
+            <div class="form-group">
+                <label>Quantidade</label>
+                <input id="amount" type="number" value="200">
+            </div>
+
+            <button class="btn primary" onclick="start()">
+                ▶️ Iniciar Geração
+            </button>
+        </div>
+
+        <!-- STATUS -->
+        <div class="card">
+            <h2>Status do Processo</h2>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="bar"></div>
+            </div>
+
+            <div class="status-list">
+                <div class="status-item">
+                    <span>Gerados</span>
+                    <strong id="generated">0</strong>
+                </div>
+
+                <div class="status-item">
+                    <span>Atual</span>
+                    <strong id="current">-</strong>
+                </div>
+
+                <div class="status-item">
+                    <span>Último</span>
+                    <strong id="last">-</strong>
+                </div>
+
+                <div id="save-status" class="status-info"></div>
+                <div id="error" class="status-error"></div>
+            </div>
+        </div>
+
+        <!-- CSV FULL WIDTH -->
+        <div class="card full">
+            <h2>Arquivo CSV</h2>
+            <button class="btn secondary" onclick="download()">
+                ⬇️ Download CSV
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<!-- JS ORIGINAL (INALTERADO) -->
+<script>
+async function start() {
+    await fetch('/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            prefix: document.getElementById('prefix').value,
+            amount: Number(document.getElementById('amount').value)
+        })
+    });
+
+    poll();
+}
+
+async function poll() {
+    const res = await fetch('/api/status');
+    const s = await res.json();
+
+    document.getElementById('generated').innerText = s.generated;
+    document.getElementById('current').innerText = s.current || '-';
+    document.getElementById('last').innerText = s.last || '-';
+
+    document.getElementById('save-status').innerText =
+        s.saved ? '✅ Salvo no CSV' : '❌ Não salvo';
+
+    document.getElementById('error').innerText = s.error || '';
+
+    if (s.total > 0) {
+        document.getElementById('bar').style.width =
+            (s.generated / s.total * 100) + '%';
+    }
+
+    if (s.running) {
+        setTimeout(poll, 1000);
+    }
+}
+
+function download() {
+    window.location.href = '/download';
+}
+</script>
+
+</body>
+</html>

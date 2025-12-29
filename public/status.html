@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Status / Disparo</title>
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+
+<div class="sidebar">
+    <a href="/"><h1>WhatsApp Panel</h1></a>
+    <a href="/status" class="active">📡 Status</a>
+    <a href="/csv">📄 Lista de Contatos</a>
+    <a href="/generate">🔢 Gerador</a>
+    <a href="/message">✉️ Mensagens</a>
+</div>
+
+<div class="main">
+    <h1>Disparo de Mensagens</h1>
+
+    <div class="card">
+        <h2>Escolha o Template</h2>
+        <select id="templateSelect"></select>
+        <button class="btn primary" id="sendBtn">📤 Disparar para todos</button>
+    </div>
+
+    <div class="card">
+        <h2>Status do Disparo</h2>
+        <div id="statusList" class="status-list"></div>
+    </div>
+</div>
+
+<script>
+async function loadTemplates() {
+    const res = await fetch('/api/templates');
+    const templates = await res.json();
+    const select = document.getElementById('templateSelect');
+
+    templates.forEach(t => {
+        const option = document.createElement('option');
+        option.value = t.id;
+        option.text = t.name;
+        select.add(option);
+    });
+}
+
+document.getElementById('sendBtn').addEventListener('click', async () => {
+    const templateId = document.getElementById('templateSelect').value;
+    const statusList = document.getElementById('statusList');
+    statusList.innerHTML = '⏳ Iniciando disparo...';
+
+    const res = await fetch('/api/sendAll', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ templateId })
+    });
+
+    const data = await res.json();
+    statusList.innerHTML = '';
+    data.results.forEach(r => {
+        const div = document.createElement('div');
+        div.className = 'status-item';
+        div.textContent = `${r.number} → ${r.status}${r.error ? ': ' + r.error : ''}`;
+        statusList.appendChild(div);
+    });
+});
+
+loadTemplates();
+</script>
+
+</body>
+</html>

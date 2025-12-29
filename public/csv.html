@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <a href="/"><h1>WhatsApp Panel</h1></a>
+    <a href="/status">📡 Status</a>
+    <a href="/csv" class="active">📄 Lista de Contatos</a>
+    <a href="/generate">🔢 Gerador</a>
+    <a href="/message">✉️ Mensagens</a>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+    <h1>📄 Lista de Contatos</h1>
+    <div id="status"></div>
+        <!-- PROGRESSO -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
+    <!-- RODANDO (FIXO NO TOPO) -->
+    <div class="running-row" id="running-row" style="display:none;">
+        <span id="running-number"></span>
+        <span class="running">Rodando...</span>
+    </div>
+
+    <table id="table">
+        <thead>
+            <tr>
+                <th>Número</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="csv-body"></tbody>
+
+    </table>
+</div>
+
+<script>
+let lastCount = 0;
+
+async function load() {
+    const [vRes, nRes] = await Promise.all([
+        fetch('/api/validation'),
+        fetch('/api/numbers')
+    ]);
+
+    const validation = await vRes.json();
+    const numbers = await nRes.json();
+
+    const status = document.getElementById('status');
+    const tbody = document.getElementById('csv-body');
+    const runningRow = document.getElementById('running-row');
+
+    /* STATUS */
+    if (validation.status === 'idle') {
+        status.innerText = '⏸️ Aguardando validação';
+    } else if (validation.status === 'running') {
+        status.innerText = '⏳ Validando números...';
+    } else {
+        status.innerText = '✅ Validação concluída';
+    }
+
+    /* PROGRESSO */
+    if (validation.total > 0) {
+        const percent = Math.min(
+            ((validation.index + 1) / validation.total) * 100,
+            100
+        );
+        document.getElementById('progress-bar').style.width = percent + '%';
+    }
+
+    /* RODANDO */
+    if (validation.next) {
+        document.getElementById('running-number').innerText = validation.next.number;
+        runningRow.style.display = 'flex';
+    } else {
+        runningRow.style.display = 'none';
+    }
+
+    /* TABELA (DINÂMICA REAL) */
+    if (numbers.length !== lastCount) {
+        tbody.innerHTML = '';
+
+        numbers.forEach(n => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${n.number}</td>
+                <td class="${n.valid ? 'ok' : 'fail'}">
+                    ${n.valid ? 'Válido' : 'Inválido'}
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        lastCount = numbers.length;
+    }
+
+    if (validation.status === 'running') {
+        setTimeout(load, 1200);
+    }
+}
+
+/* Inicialização */
+load();
+</script>
+
+
+
+
+</body>
+</html>

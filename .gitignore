@@ -1,0 +1,9 @@
+/node_modules/
+/package-lock.json
+/uploads/images/*
+/uploads/csv/*
+/relatorio.sh
+/relatorio_tree_.log
+/public/output/*
+/output/*
+/auth/*

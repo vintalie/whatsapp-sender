@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>WhatsApp Sender Panel</title>
+
+<link rel="stylesheet" href="assets/style.css">
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <a href="/"><h1>WhatsApp Panel</h1></a>
+    <a href="/status">📡 Status</a>
+    <a href="/csv">📄 Lista de Contatos</a>
+    <a href="/generate">🔢 Gerador</a>
+    <a href="/message">✉️ Mensagens</a>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+    <div class="header">Dashboard</div>
+
+    <div class="grid">
+
+        <!-- STATUS -->
+        <div class="card">
+            <h2>Status WhatsApp</h2>
+            <div id="statusBox" class="status">
+                <span></span>
+                <div id="status">Aguardando QR Code...</div>
+            </div>
+            <img id="qrcode">
+        </div>
+
+        <!-- CSV -->
+        <div class="card">
+            <h2>Validação CSV</h2>
+            <form action="/upload" method="post" enctype="multipart/form-data">
+                <input type="file" name="csv" required>
+                <button>Validar Números</button>
+            </form>
+        </div>
+
+        <!-- MESSAGE -->
+        <div class="card">
+            <h2>Envio de Mensagem</h2>
+            <form action="/send" method="post">
+                <textarea name="message" placeholder="Digite sua mensagem"></textarea>
+                <input type="hidden" name="numbers" id="numbers">
+                <button>Enviar Mensagens</button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<script>
+async function loadQR() {
+    const res = await fetch('/qrcode');
+    const data = await res.json();
+
+    const qr = document.getElementById('qrcode');
+    const status = document.getElementById('status');
+    const statusBox = document.getElementById('statusBox');
+
+    if (data.qr) {
+        qr.src = data.qr;
+        qr.style.display = 'block';
+        status.innerText = 'Escaneie o QR Code no WhatsApp';
+        statusBox.classList.remove('connected');
+        return;
+    }
+
+    if (data.connected) {
+        qr.style.display = 'none';
+        status.innerText = 'WhatsApp conectado';
+        statusBox.classList.add('connected');
+        return;
+    }
+
+    status.innerText = 'Aguardando QR Code...';
+}
+setInterval(loadQR, 2000);
+</script>
+
+
+</body>
+</html>

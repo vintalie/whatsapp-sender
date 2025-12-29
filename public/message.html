@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Templates de Mensagens</title>
+
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <a href="/"><h1>WhatsApp Panel</h1></a>
+    <a href="/status">📡 Status</a>
+    <a href="/csv">📄 Lista de Contatos</a>
+    <a href="/generate">🔢 Gerador</a>
+    <a href="/message" class="active">✉️ Mensagens</a>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+    <h1>Templates de Mensagens</h1>
+
+    <!-- CREATE TEMPLATE -->
+    <div class="card">
+        <h2>Criar Template</h2>
+
+        <form id="templateForm" enctype="multipart/form-data">
+            <input type="text" name="name" placeholder="Nome do template" required>
+
+            <textarea name="text" placeholder="Mensagem" required></textarea>
+
+            <input type="file" name="image" accept="image/*">
+
+            <button type="submit">💾 Salvar Template</button>
+        </form>
+
+        <div id="formStatus"></div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="card">
+        <h2>Templates Salvos</h2>
+
+        <table class="blue-table">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Mensagem</th>
+                    <th>Imagem</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+
+            <tbody id="templateTable"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script src="/assets/message.js"></script>
+</body>
+</html>
